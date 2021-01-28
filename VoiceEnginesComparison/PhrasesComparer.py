@@ -64,7 +64,7 @@ if __name__ == '__main__':
 	import argparse
 	parser = argparse.ArgumentParser(description="Compare two phrases")
 	parser.add_argument('-p1', '--phrase1', required=True, help="First phrase for comparing")
-	parser.add_argument('-p2', '--phrase2', required=True, help="Second phase for comparing")
+	parser.add_argument('-p2', '--phrase2', required=True, help="Second phrase for comparing")
 		
 	ARGS = parser.parse_args()
 	main(ARGS)
