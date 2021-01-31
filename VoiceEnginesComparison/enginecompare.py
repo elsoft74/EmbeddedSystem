@@ -27,6 +27,7 @@ def main(ARGS):
 		stopword=ARGS.stop
 	if ARGS.ref:
 		referencephrase=ARGS.ref
+	tok1=referencephrase.split(" ")
 		
 	model = deepspeech.Model("ds-model.tflite")
 	model.enableExternalScorer("ds-model.scorer")
@@ -38,6 +39,9 @@ def main(ARGS):
 		ts=0
 		tg=0
 		tds=0
+		tok2=[]
+		tok3=[]
+		tok4=[]
 		cont=ARGS.cont
 		vad_audio = VADAudio(aggressiveness=1, device=None, input_rate=16000, file=None)
 		spinner = Halo(spinner='line')
@@ -58,9 +62,10 @@ def main(ARGS):
 				t1=time.time()
 				stream_context.feedAudioContent(np.frombuffer(audio, np.int16))
 				resds = stream_context.finishStream()
+				tds= round((time.time()-t1)*100)/100
 				if resg==stopword:
 					cont=False
-				tds= round((time.time()-t1)*100)/100
+				tok2=resds.split(" ")
 				filename=datetime.now().strftime("savewav_%Y-%m-%d_%H-%M-%S_%f.wav")
 				vad_audio.write_wav(filename, audio)
 				print("Deep Speech thinks you said: " + resds + " ("+str(tds)+" s)")
@@ -76,6 +81,7 @@ def main(ARGS):
 			t1=time.time()
 			resg=r.recognize_google(audio)
 			tg=round(100*(time.time()-t1))/100
+			tok3=resg.split(" ")
 			print("Google Speech Recognition thinks you said: " + resg + " ("+str(tg)+" s)")
 			out=1
 			if resg==stopword:
@@ -90,6 +96,7 @@ def main(ARGS):
 			t1=time.time()
 			ress=r.recognize_sphinx(audio, language="en-US")
 			ts=round(100*(time.time()-t1))/100
+			tok4=ress.split(" ")
 			print("Sphinx thinks you said: " + ress + " ("+str(ts)+" s)")
 			out=1
 			if ress==stopword:
@@ -103,7 +110,7 @@ def main(ARGS):
 		# try:
 		if out:
 			fileOut = open("results.csv","a")
-			fileOut.write('"'+filename+'","'+referencephrase+'","'+resds+'",'+str(tds)+',0,0,0,0,0,0,"'+ress+'",'+str(ts)+',0,0,0,0,0,0,"'+resg+'",'+str(tg)+',0,0,0,0,0,0\n')
+			fileOut.write('"'+filename+'","'+referencephrase+'",'+str(len(tok1))+',"'+resds+'",'+str(tds)+','+str(len(tok2))+',0,0,0,0,0,0,"'+ress+'",'+str(ts)+','+str(len(tok4))+',0,0,0,0,0,0,"'+resg+'",'+str(tg)+','+str(len(tok3))+',0,0,0,0,0,0\n')
 			fileOut.close()
 
 
