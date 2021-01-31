@@ -19,12 +19,9 @@ from morethings import VADAudio
 
 def main(ARGS):
 	cont=True
-	referencephrase=None
+	referencephrase=""
 	out=0
-	ress=""
-	resg=""
-	ts=0
-	tg=0
+
 	
 	if ARGS.stop:
 		stopword=ARGS.stop
@@ -35,6 +32,12 @@ def main(ARGS):
 	model.enableExternalScorer("ds-model.scorer")
 		
 	while cont:
+		ress=""
+		resg=""
+		resds=""
+		ts=0
+		tg=0
+		tds=0
 		cont=ARGS.cont
 		vad_audio = VADAudio(aggressiveness=1, device=None, input_rate=16000, file=None)
 		spinner = Halo(spinner='line')
@@ -48,39 +51,23 @@ def main(ARGS):
 			if frame is not None:
 				if t1 is None:
 					t1=time.time()
-				stream_context.feedAudioContent(np.frombuffer(frame, np.int16))
+				#stream_context.feedAudioContent(np.frombuffer(frame, np.int16))
 				audio.extend(frame)
 			else:
-				#vad_audio.write_wav(datetime.now().strftime("savewav_%Y-%m-%d_%H-%M-%S_%f.wav"), audio)
 				spinner.stop()
+				t1=time.time()
+				stream_context.feedAudioContent(np.frombuffer(audio, np.int16))
 				resds = stream_context.finishStream()
+				if resg==stopword:
+					cont=False
 				tds= round((time.time()-t1)*100)/100
-				vad_audio.write_wav("rec.wav", audio)
-				print("Recognized: " + resds + " ("+str(tds)+" s)")
+				filename=datetime.now().strftime("savewav_%Y-%m-%d_%H-%M-%S_%f.wav")
+				vad_audio.write_wav(filename, audio)
+				print("Deep Speech thinks you said: " + resds + " ("+str(tds)+" s)")
 				break
-		# obtain audio from the microphone
+		# we need an AudioData object from the audio bytearray
 		r = sr.Recognizer()
 		audio=sr.AudioData(audio, 16000, 2)
-		# with sr.Microphone() as source:
-			# r.adjust_for_ambient_noise(source)
-			# spinner = Halo(spinner='line')
-			# spinner.start()
-			# print("Say something!")
-			# out=0
-			# audio = r.listen(source)
-			# spinner.stop()
-			# print(audio.__str__())
-			# audioW=audio.get_wav_data(convert_rate=16000)
-			# filetosave=open("rec.wav","wb")
-			# filetosave.write(audioW)
-			# filetosave.close()
-			# #print(vad_segment_generator("rec.wav",1))
-			# #print(audioW)
-			# #fs = audioW.sample_rate
-			
-		# # deepspeech part
-		# print(stt(ds,"rec.wav",16000))
-		
 			
 		# recognize speech using Google Speech Recognition
 		try:
@@ -112,38 +99,12 @@ def main(ARGS):
 		except sr.RequestError as e:
 			print("Sphinx error; {0}".format(e))
 			
-
 		
 		# try:
 		if out:
 			fileOut = open("results.csv","a")
-			fileOut.write('"'+ress+'",'+str(ts)+',"'+resg+'",'+str(tg)+'\n')
+			fileOut.write('"'+filename+'","'+referencephrase+'","'+resds+'",'+str(tds)+',0,0,0,0,0,0,'+ress+'",'+str(ts)+',0,0,0,0,0,0,'+',"'+resg+'",'+str(tg)+',0,0,0,0,0,0\n')
 			fileOut.close()
-
-def stt(ds, audio, fs):
-    inference_time = 0.0
-    audio_length = len(audio) * (1 / fs)
-
-    # Run Deepspeech
-    logging.debug('Running inference...')
-    inference_start = timer()
-    output = ds.stt(audio)
-    inference_end = timer() - inference_start
-    inference_time += inference_end
-    logging.debug('Inference took %0.3fs for %0.3fs audio file.' % (inference_end, audio_length))
-
-    return [output, inference_time]
-    
-def vad_segment_generator(wavFile, aggressiveness):
-    logging.debug("Caught the wav file @: %s" % (wavFile))
-    audio, sample_rate, audio_length = wavSplit.read_wave(wavFile)
-    assert sample_rate == 16000, "Only 16000Hz input WAV files are supported for now!"
-    vad = webrtcvad.Vad(int(aggressiveness))
-    frames = wavSplit.frame_generator(30, audio, sample_rate)
-    frames = list(frames)
-    segments = wavSplit.vad_collector(sample_rate, 30, 300, vad, frames)
-
-    return segments, sample_rate, audio_length
 
 
 if __name__ == '__main__':
