@@ -103,7 +103,7 @@ def main(ARGS):
 		# try:
 		if out:
 			fileOut = open("results.csv","a")
-			fileOut.write('"'+filename+'","'+referencephrase+'","'+resds+'",'+str(tds)+',0,0,0,0,0,0,'+ress+'",'+str(ts)+',0,0,0,0,0,0,'+',"'+resg+'",'+str(tg)+',0,0,0,0,0,0\n')
+			fileOut.write('"'+filename+'","'+referencephrase+'","'+resds+'",'+str(tds)+',0,0,0,0,0,0,"'+ress+'",'+str(ts)+',0,0,0,0,0,0,"'+resg+'",'+str(tg)+',0,0,0,0,0,0\n')
 			fileOut.close()
 
 
