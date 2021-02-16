@@ -144,17 +144,17 @@ def main(ARGS):
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser(
-        description="Compare the result of different voice recognition engine")
+        description="Compare the result of different voice recognition engine.")
     parser.add_argument('-s', '--stop', required=False, default="stop",
-                        help="Stopword to interrupt the recognition, default is stop")
+                        help="Stopword to interrupt the recognition, default is stop.")
     parser.add_argument('-c', '--cont', required=False,
-                        default=False, help="Continuos mode on, default is off")
+                        default=False, help="Continuos mode on, default is off.")
     parser.add_argument('-r', '--ref', required=False,
-                        help="Reference phrase for comparing results and google speech synthesis")
+                        help="Reference phrase for comparing results and google speech synthesis.")
     parser.add_argument('-n', '--number', required=False,
-                        help="Number of repetition, if is set the recognition is done for a maximum of 'number' times")
+                        help="Number of repetition, if is set the recognition is done for a maximum of 'number' times.")
     parser.add_argument('-i', '--input', required=False,
-                        help="Text file with phrases to recognize, one for line. If this flag is set the cont, ref and number option will be ignored")
+                        help="Text file with phrases to recognize, one for line.\nThe recognition will be executed from le last line to the first one.\nIf this flag is set the cont, ref and number option will be ignored.")
 
     ARGS = parser.parse_args()
     main(ARGS)
