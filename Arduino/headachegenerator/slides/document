@@ -1,0 +1,63 @@
+\documentclass[11pt]{beamer}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usetheme{metropolis}
+\usepackage{url}
+
+\begin{document}
+	\author{Ivo Pugliese (518847)}
+	\title{Headhache generator}
+	\subtitle{An accademic Arduino project}
+	%\logo{}
+	\institute{Universit\`{a} di Messina}
+	\date{08/11/2020}
+	%\subject{}
+	%\setbeamercovered{transparent}
+	%\setbeamertemplate{navigation symbols}{}
+	\begin{frame}[plain]
+		\maketitle
+	\end{frame}
+	\begin{frame}[plain]
+		\tableofcontents
+	\end{frame}
+		
+	\begin{frame}
+		\section{The buzzers}
+		\frametitle{The buzzers}
+	\end{frame}
+
+	\begin{frame}
+		\frametitle{The buzzers}
+		According to "the freedictionary" a buzzer is: \emph{An electric signaling device, such as a doorbell, that makes a buzzing sound.}
+		For our test purpose we are interesed in Piezoelectric buzzers.
+		\begin{figure}
+			\caption{Some buzzers}
+			\centering
+			\includegraphics{imgs/92498.png}
+		\end{figure}
+	\end{frame}
+
+	\begin{frame}
+		\section{Sound basics}
+		\frametitle{Sound basics}
+	\end{frame}
+
+	\begin{frame}
+		\section{Aurduino PWM}
+		\frametitle{Aurduino PWM}
+	\end{frame}
+	\begin{frame}
+		\section{The code}
+		\frametitle{The code}
+	\end{frame}
+	\begin{frame}
+		\section{Bibliography}
+		\frametitle{Bibliography}
+		\begin{thebibliography}
+			\bibitem{buzzer}
+				url="https://www.thefreedictionary.com/buzzer"
+		\end{thebibliography}
+	\end{frame}
+
+\end{document}
