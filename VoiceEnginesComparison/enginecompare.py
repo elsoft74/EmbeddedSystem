@@ -39,8 +39,6 @@ def main(ARGS):
 
     if ARGS.stop:
         stopword = ARGS.stop
-    if ARGS.cont:
-        cont = ARGS.cont
     if ARGS.ref:
         referencephrases.append(ARGS.ref)
     if ARGS.number:
@@ -59,6 +57,7 @@ def main(ARGS):
     model.enableExternalScorer("ds-model.scorer")
 
     while cont and (ARGS.input is None or len(referencephrases) > 0):
+        cont = ARGS.cont
         lcd.clear()
         ress = ""
         resg = ""
