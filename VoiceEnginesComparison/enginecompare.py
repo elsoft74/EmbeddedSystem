@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+from numpy.core import numeric
 import speech_recognition as sr
 import time
 from datetime import datetime
@@ -16,6 +17,7 @@ import warnings
 
 warnings.filterwarnings("ignore")
 
+
 def showLcd(lcd, msg1, msg2):
     lcd.clear()
     lcd.message(msg1+"\n"+msg2)
@@ -31,7 +33,7 @@ def showLcd(lcd, msg1, msg2):
 def main(ARGS):
     cont = True
     referencephrases = []
-    out = 0
+    out = False
     number = None
     inputfile = None
     lcd = Adafruit_CharLCD(rs=26, en=19, d4=13, d5=6,
@@ -43,7 +45,7 @@ def main(ARGS):
         referencephrases.append(ARGS.ref)
     if ARGS.number:
         number = int(ARGS.number)
-        cont = True
+        # cont = True
     if ARGS.input:
         try:
             inputfile = open(ARGS.input, 'r')
@@ -53,11 +55,17 @@ def main(ARGS):
             showLcd(lcd, "Could not open/read file: ", ARGS.input)
             sys.exit()
 
-    model = deepspeech.Model("ds-model.tflite")
-    model.enableExternalScorer("ds-model.scorer")
+    try:
+        model = deepspeech.Model("ds-model.tflite")
+        model.enableExternalScorer("ds-model.scorer")
+    except:
+        print("Something went wrong while loading the DeepSpeech model\n")
+        sys.exit()
 
     while cont and (ARGS.input is None or len(referencephrases) > 0):
-        cont = ARGS.cont
+        cont = ARGS.cont == 'on'
+        if ARGS.input is not None:
+            cont = True
         lcd.clear()
         ress = ""
         resg = ""
@@ -77,9 +85,20 @@ def main(ARGS):
                              input_rate=16000, file=None)
         spinner = Halo(spinner='line')
         if not ARGS.input:
+            print("Stopword: "+stopword)
+            if number is not None:
+                print("Number of recognitions: "+str(number))
+            if ARGS.cont=='on':
+                print("Continuos mode is active")
+                print(ARGS)
+            else:
+                print("Continuos mode is not active")
+                print(ARGS)
             print("Say something!")
             showLcd(lcd, "Say something!", "")
             spinner.start()
+        else:
+            print("Reading from: "+inputfile.name)
         subprocess.call(['google_speech', '-l', 'en-us', referencephrase])
         frames = vad_audio.vad_collector()
         stream_context = model.createStream()
@@ -93,7 +112,7 @@ def main(ARGS):
                 audio.extend(frame)
             else:
                 spinner.stop()
-                if number is not None:
+                if number is not None and number > 0:
                     number = number - 1
                     if number == 0:
                         cont = False
@@ -102,7 +121,7 @@ def main(ARGS):
                 stream_context.feedAudioContent(np.frombuffer(audio, np.int16))
                 resds = stream_context.finishStream()
                 tds = round((time.time()-t1)*100)/100
-                if resg == stopword:
+                if resg == stopword and inputfile is None:
                     cont = False
                 tok2 = resds.split(" ")
                 filename = datetime.now().strftime("savewav_%Y-%m-%d_%H-%M-%S_%f.wav")
@@ -126,7 +145,7 @@ def main(ARGS):
             tok3 = resg.split(" ")
             msg = "Google results:\n" + resg + " ("+str(tg)+" s)"
             out = 1
-            if resg == stopword:
+            if resg == stopword and inputfile is None:
                 cont = False
         except sr.UnknownValueError:
             msg = "Google Speech Recognition could not understand audio"
@@ -145,7 +164,7 @@ def main(ARGS):
             tok4 = ress.split(" ")
             msg = "Sphinx results:\n" + ress + " (" + str(ts) + " s)"
             out = 1
-            if ress == stopword:
+            if ress == stopword and inputfile is None:
                 cont = False
         except sr.UnknownValueError:
             msg = "Sphinx could not understand audio"
@@ -164,7 +183,7 @@ def main(ARGS):
             fileOut.write('"'+filename+'","'+referencephrase+'",'+str(len(tok1))+',"'+resds+'",'+str(tds)+','+str(len(tok2)) +
                           ',0,0,0,0,0,0,"'+ress+'",'+str(ts)+','+str(len(tok4))+',0,0,0,0,0,0,"'+resg+'",'+str(tg)+','+str(len(tok3))+',0,0,0,0,0,0\n')
             fileOut.close()
-    showLcd(lcd,"","")
+    showLcd(lcd, "", "")
 
 
 if __name__ == '__main__':
@@ -174,7 +193,7 @@ if __name__ == '__main__':
     parser.add_argument('-s', '--stop', required=False, default="stop",
                         help="Stopword to interrupt the recognition, default is stop.")
     parser.add_argument('-c', '--cont', required=False,
-                        default=False, help="Continuos mode on, default is off.")
+                        default='off', help="on/off\nContinuos mode on, default is off.")
     parser.add_argument('-r', '--ref', required=False,
                         help="Reference phrase for comparing results and google speech synthesis.")
     parser.add_argument('-n', '--number', required=False,
