@@ -34,7 +34,7 @@ def main(ARGS):
     cont = True
     referencephrases = []
     out = False
-    number = None
+    number = 0
     inputfile = None
     lcd = Adafruit_CharLCD(rs=26, en=19, d4=13, d5=6,
                            d6=5, d7=11, cols=16, lines=2)
@@ -45,6 +45,7 @@ def main(ARGS):
         referencephrases.append(ARGS.ref)
     if ARGS.number:
         number = int(ARGS.number)
+        ARGS.cont = "off"
         # cont = True
     if ARGS.input:
         try:
@@ -63,7 +64,7 @@ def main(ARGS):
         sys.exit()
 
     while cont and (ARGS.input is None or len(referencephrases) > 0):
-        cont = ARGS.cont == 'on'
+        cont = ARGS.cont == 'on' or number > 0
         if ARGS.input is not None:
             cont = True
         lcd.clear()
@@ -77,7 +78,10 @@ def main(ARGS):
         tok3 = []
         tok4 = []
         if referencephrases is not None and len(referencephrases) > 0:
-            referencephrase = referencephrases.pop()
+            if number>0 or ARGS.cont=='on':
+                referencephrase = referencephrases[0]
+            else:
+                referencephrase = referencephrases.pop()
         else:
             referencephrase = ""
         tok1 = referencephrase.split(" ")
@@ -86,14 +90,14 @@ def main(ARGS):
         spinner = Halo(spinner='line')
         if not ARGS.input:
             print("Stopword: "+stopword)
-            if number is not None:
-                print("Number of recognitions: "+str(number))
-            if ARGS.cont=='on':
+            if ARGS.number:
+                print("Number of remaing recognitions: "+str(number))
+            if ARGS.cont == 'on':
                 print("Continuos mode is active")
-                print(ARGS)
             else:
                 print("Continuos mode is not active")
-                print(ARGS)
+            if ARGS.ref:
+                print("Reference phrase: "+referencephrase)
             print("Say something!")
             showLcd(lcd, "Say something!", "")
             spinner.start()
