@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from numpy.core import numeric
+from num2words import num2words
 import speech_recognition as sr
 import time
 from datetime import datetime
@@ -28,6 +29,17 @@ def showLcd(lcd, msg1, msg2):
         lcd.message(msg1+"\n"+msg2[0+i:14+i])
         time.sleep(0.3)
     time.sleep(0.5)
+
+
+def convertNumberToWords(par):
+    tmpPhrase = par.split()
+    tmpOut = ""
+    for x in tmpPhrase:
+        try:
+            tmpOut = tmpOut+" "+num2words(x).replace("-"," ")
+        except:
+            tmpOut = tmpOut+" "+x
+    return tmpOut.lstrip()
 
 
 def main(ARGS):
@@ -78,10 +90,10 @@ def main(ARGS):
         tok3 = []
         tok4 = []
         if referencephrases is not None and len(referencephrases) > 0:
-            if number>0 or ARGS.cont=='on':
-                referencephrase = referencephrases[0]
+            if number > 0 or ARGS.cont == 'on':
+                referencephrase = convertNumberToWords(referencephrases[0])
             else:
-                referencephrase = referencephrases.pop()
+                referencephrase = convertNumberToWords(referencephrases.pop())
         else:
             referencephrase = ""
         tok1 = referencephrase.split(" ")
@@ -125,6 +137,7 @@ def main(ARGS):
                 stream_context.feedAudioContent(np.frombuffer(audio, np.int16))
                 resds = stream_context.finishStream()
                 tds = round((time.time()-t1)*100)/100
+                resds = convertNumberToWords(resds)
                 if resg == stopword and inputfile is None:
                     cont = False
                 tok2 = resds.split(" ")
@@ -146,6 +159,7 @@ def main(ARGS):
             t1 = time.time()
             resg = r.recognize_google(audio)
             tg = round(100*(time.time()-t1))/100
+            resg = convertNumberToWords(resg)
             tok3 = resg.split(" ")
             msg = "Google results:\n" + resg + " ("+str(tg)+" s)"
             out = 1
@@ -165,6 +179,7 @@ def main(ARGS):
             t1 = time.time()
             ress = r.recognize_sphinx(audio, language="en-US")
             ts = round(100*(time.time()-t1))/100
+            ress = convertNumberToWords(ress)
             tok4 = ress.split(" ")
             msg = "Sphinx results:\n" + ress + " (" + str(ts) + " s)"
             out = 1
