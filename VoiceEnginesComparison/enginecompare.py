@@ -115,7 +115,8 @@ def main(ARGS):
             spinner.start()
         else:
             print("Reading from: "+inputfile.name)
-        subprocess.call(['google_speech', '-l', 'en-us', referencephrase])
+        if not ARGS.quiet:
+            subprocess.call(['google_speech', '-l', 'en-us', referencephrase])
         frames = vad_audio.vad_collector()
         stream_context = model.createStream()
         audio = bytearray()
@@ -219,6 +220,8 @@ if __name__ == '__main__':
                         help="Number of repetition, if is set the recognition is done for a maximum of 'number' times.")
     parser.add_argument('-i', '--input', required=False,
                         help="Text file with phrases to recognize, one for line.\nThe recognition will be executed from le last line to the first one.\nIf this flag is set the cont, ref and number option will be ignored.")
+    parser.add_argument('-q', '--quiet', required=False, default=False, type=bool,
+                        help="If set at True will not reproduce the reference phrase, default is False.")
 
     ARGS = parser.parse_args()
     main(ARGS)
